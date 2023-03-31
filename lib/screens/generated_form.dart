@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miilk_dairy_bill/utils/loaders.dart';
+import 'package:new_dairy_bill/utils/loaders.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 
 class GeneratedForm extends StatefulWidget {
@@ -15,15 +15,16 @@ class GeneratedForm extends StatefulWidget {
 
 class _GeneratedFormState extends State<GeneratedForm> {
   final _formKey = GlobalKey<FormState>();
-  int currDays;
-  Map<int, double> litersData = new Map();
-  Map<int, double> fatData = new Map();
-  String errorsData;
-  double calculatedLiters,
+  late int currDays;
+  Map<int, dynamic> litersData = new Map();
+  Map<int, dynamic> fatData = new Map();
+  late String errorsData;
+  late double calculatedLiters,
       calculatedBill,
       calculatedCommission,
       calculatedFinalBill,
       priceValue;
+  late List<TableRow> table_rows;      
 
   @override
   void initState() {
@@ -60,21 +61,28 @@ class _GeneratedFormState extends State<GeneratedForm> {
   }
 
   showAlertDialog(
-      BuildContext context, liters, bill, commision, finalBill, errors) {
+      BuildContext context, liters, bill, commision, finalBill, table_rows, errors) {
     // set up the button
-    Widget okButton = FlatButton(
+    Widget okButton = TextButton(
       child: Text("OK"),
       onPressed: () {
         Navigator.of(context).pop();
       },
     );
-
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("Calculated Results:"),
       content: Container(
         child: Column(
           children: <Widget>[
+            // Display Total Table
+            table_rows.length == 1 ? Container():
+            Table(
+              border: TableBorder.all(color: Colors.black38, width: 2.5),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: table_rows,
+            ),
+            SizedBox(height: 10,),
             // Display Toatl Liters
             Container(
               padding: EdgeInsets.all(10),
@@ -145,7 +153,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
                     margin: EdgeInsets.only(bottom: 10, top: 20),
                     alignment: Alignment.topLeft,
                     decoration: BoxDecoration(
-                      color: Colors.greenAccent,
+                      color: Colors.black38,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text('No Errors... '),
@@ -165,7 +173,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
                 : Container(
                     padding: EdgeInsets.all(10),
                     margin: EdgeInsets.only(bottom: 10),
-                    height: 300,
+                    height: 250,
                     decoration: BoxDecoration(
                       color: Colors.redAccent,
                       borderRadius: BorderRadius.circular(10),
@@ -192,6 +200,36 @@ class _GeneratedFormState extends State<GeneratedForm> {
     );
   }
 
+  initialize_table(){
+    table_rows = [TableRow(children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 3, bottom: 3),
+                  child: const Text(
+                    "Ltr",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 3, bottom: 3),
+                  child: const Text(
+                    "Fat",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 3, bottom: 3),
+                  child: const Text(
+                    "Amt",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ])];
+    return table_rows;
+  }
+
   generateBill() {
     rippleLoader();
     EasyLoading.show(status: 'Calculating Bill...');
@@ -200,13 +238,42 @@ class _GeneratedFormState extends State<GeneratedForm> {
     setState(() {
       errorsData = '';
     });
+    table_rows = initialize_table();
     calculatedBill = 0;
     calculatedLiters = 0;
     priceValue = widget.liter_price / 10;
     for (int i = 0; i < widget.days; i++) {
       if (litersData[i] != null && fatData[i] != null) {
-        calculatedBill += litersData[i] * fatData[i] * priceValue;
-        calculatedLiters += litersData[i];
+        calculatedBill += litersData[i]! * fatData[i]! * priceValue;
+        calculatedLiters += litersData[i]!;
+        table_rows.add(
+          TableRow(children: [
+            Container(
+              margin: const EdgeInsets.only(top: 3, bottom: 3),
+              child: Text(
+                litersData[i]!.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 3, bottom: 3),
+              child: Text(
+                fatData[i]!.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 3, bottom: 3),
+              child: Text(
+                (litersData[i]! * fatData[i]! * priceValue).toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ])
+        );
       }
       if (litersData[i] == null) {
         errorsData += 'Data - ' + (i + 1).toString() + ' Liters Not Added.\n\n';
@@ -217,14 +284,8 @@ class _GeneratedFormState extends State<GeneratedForm> {
     }
     calculatedCommission = calculatedBill * widget.commission / 100;
     calculatedFinalBill = calculatedBill - calculatedCommission;
-
-    print("Total Liters - $calculatedLiters");
-    print("Bill - $calculatedBill");
-    print("Commission - $calculatedCommission");
-    print("Final AMount - $calculatedFinalBill");
-
     showAlertDialog(context, calculatedLiters, calculatedBill,
-        calculatedCommission, calculatedFinalBill, errorsData);
+        calculatedCommission, calculatedFinalBill, table_rows, errorsData);
 
     EasyLoading.dismiss();
   }
@@ -235,23 +296,23 @@ class _GeneratedFormState extends State<GeneratedForm> {
         children: <Widget>[
           Container(
             width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 color: Colors.black38,
-                borderRadius: BorderRadius.all(Radius.circular(25))),
+                borderRadius: BorderRadius.all(Radius.circular(7))),
             child: SingleChildScrollView(
               child: Form(
                 key: _formKey,
                 child: Container(
                   height: MediaQuery.of(context).size.height - 330,
                   padding: EdgeInsets.only(top: 10),
-                  child: StaggeredGridView.countBuilder(
+                  child: MasonryGridView.count(
                     crossAxisCount: 1,
                     crossAxisSpacing: 20,
                     itemCount: widget.days,
                     itemBuilder: (context, index) {
                       return buildForm(index);
                     },
-                    staggeredTileBuilder: (index) => StaggeredTile.fit(1),
+                    // staggeredTileBuilder: (index) => StaggeredTile.fit(1),
                   ),
                 ),
               ),
@@ -262,7 +323,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
             children: <Widget>[
               InkWell(
                 onTap: () {
-                  _formKey.currentState.reset();
+                  _formKey.currentState?.reset();
                 },
                 child: Container(
                   height: 49,
@@ -348,8 +409,10 @@ class _GeneratedFormState extends State<GeneratedForm> {
             children: <Widget>[
               Container(
                 margin:
-                    EdgeInsets.only(top: 5, right: 20, left: 20, bottom: 20),
+                    EdgeInsets.only(top: 5, right: 10, left: 10, bottom: 20),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       width: (MediaQuery.of(context).size.width - 50) / 2,
@@ -373,9 +436,9 @@ class _GeneratedFormState extends State<GeneratedForm> {
                           // print(litersData);
                         },
                         buildCounter: (context,
-                            {int currentLength,
-                            bool isFocused,
-                            int maxLength}) {
+                            {int? currentLength,
+                            bool? isFocused,
+                            int? maxLength}) {
                           if (currentLength == 0) {
                             litersData.addAll({day: null});
                           }
@@ -411,15 +474,15 @@ class _GeneratedFormState extends State<GeneratedForm> {
                           print("FAT  - $value");
                         },
                         buildCounter: (context,
-                            {int currentLength,
-                            bool isFocused,
-                            int maxLength}) {
+                            {int? currentLength,
+                            bool? isFocused,
+                            int? maxLength}) {
                           if (currentLength == 0) {
                             fatData.addAll({day: null});
                           }
                           return null;
                         },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                             labelText: "FAT (%)",
                             suffixIcon: Icon(
                               Icons.integration_instructions,
