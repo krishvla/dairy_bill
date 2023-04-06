@@ -4,6 +4,13 @@ description: A new Flutter project.
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
+# ========================== Version ====================================
+# Flutter 3.7.9 • channel stable • https://github.com/flutter/flutter.git
+# Framework • revision 62bd79521d (6 days ago) • 2023-03-30 10:59:36 -0700
+# Engine • revision ec975089ac
+# Tools • Dart 2.19.6 • DevTools 2.20.1
+# =======================================================================
+
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
@@ -38,6 +45,13 @@ dependencies:
   flutter_easyloading: ^3.0.5
   flutter_staggered_grid_view: ^0.6.2
   adaptive_dialog: ^1.8.3
+  icons_launcher: ^2.1.0
+
+icons_launcher:
+  image_path: "assets/icon/logo.png"
+  platforms:
+    android:
+      enable: true
 
 dev_dependencies:
   flutter_test:

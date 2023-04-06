@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:new_dairy_bill/screens/report.dart';
 import 'package:new_dairy_bill/utils/loaders.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 
@@ -253,7 +254,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
               child: Text(
                 litersData[i]!.toString(),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
             Container(
@@ -261,19 +262,22 @@ class _GeneratedFormState extends State<GeneratedForm> {
               child: Text(
                 fatData[i]!.toString(),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
             Container(
               margin: const EdgeInsets.only(top: 3, bottom: 3),
               child: Text(
-                (litersData[i]! * fatData[i]! * priceValue).toString(),
+                double.parse((litersData[i]! * fatData[i]! * priceValue).toString()).toStringAsFixed(3),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
-          ])
+            
+          ]),
+
         );
+        
       }
       if (litersData[i] == null) {
         errorsData += 'Data - ' + (i + 1).toString() + ' Liters Not Added.\n\n';
@@ -284,10 +288,18 @@ class _GeneratedFormState extends State<GeneratedForm> {
     }
     calculatedCommission = calculatedBill * widget.commission / 100;
     calculatedFinalBill = calculatedBill - calculatedCommission;
-    showAlertDialog(context, calculatedLiters, calculatedBill,
-        calculatedCommission, calculatedFinalBill, table_rows, errorsData);
-
     EasyLoading.dismiss();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ReportsScreen(
+        calculatedLiters, calculatedBill,
+        calculatedCommission, calculatedFinalBill, table_rows, errorsData
+      )),
+    );
+    // showAlertDialog(context, calculatedLiters, calculatedBill,
+    //     calculatedCommission, calculatedFinalBill, table_rows, errorsData);
+
+    
   }
 
   Widget builtContent() {
@@ -305,14 +317,13 @@ class _GeneratedFormState extends State<GeneratedForm> {
                 child: Container(
                   height: MediaQuery.of(context).size.height - 330,
                   padding: EdgeInsets.only(top: 10),
-                  child: MasonryGridView.count(
-                    crossAxisCount: 1,
-                    crossAxisSpacing: 20,
-                    itemCount: widget.days,
-                    itemBuilder: (context, index) {
-                      return buildForm(index);
-                    },
-                    // staggeredTileBuilder: (index) => StaggeredTile.fit(1),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: <Widget>[
+                        for(int i=0; i<widget.days; i++)
+                          buildForm(i)
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -323,20 +334,20 @@ class _GeneratedFormState extends State<GeneratedForm> {
             children: <Widget>[
               InkWell(
                 onTap: () {
-                  _formKey.currentState?.reset();
+                  resetData();
                 },
                 child: Container(
                   height: 49,
                   width: (MediaQuery.of(context).size.width - 50) * 0.5,
-                  padding: EdgeInsets.only(left: 20, right: 20),
-                  margin: EdgeInsets.only(left: 10, top: 10),
+                  padding: const EdgeInsets.only(left: 20, right: 20),
+                  margin: const EdgeInsets.only(left: 10, top: 10),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: Colors.redAccent),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
+                      children: const <Widget>[
                         Text(
                           'Clear',
                           style: TextStyle(
@@ -364,15 +375,15 @@ class _GeneratedFormState extends State<GeneratedForm> {
                 child: Container(
                   height: 49,
                   width: (MediaQuery.of(context).size.width - 50) * 0.5,
-                  padding: EdgeInsets.only(left: 20, right: 20),
-                  margin: EdgeInsets.only(left: 10, top: 10),
+                  padding: const EdgeInsets.only(left: 20, right: 20),
+                  margin: const EdgeInsets.only(left: 10, top: 10),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: Colors.black38),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
+                      children: const <Widget>[
                         Text(
                           'Generate Bill',
                           style: TextStyle(
@@ -401,104 +412,126 @@ class _GeneratedFormState extends State<GeneratedForm> {
 
   Widget buildForm(day) {
     // manageLoader(day);
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Text('Data - ' + (day + 1).toString()),
-          Row(
-            children: <Widget>[
-              Container(
-                margin:
-                    EdgeInsets.only(top: 5, right: 10, left: 10, bottom: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: (MediaQuery.of(context).size.width - 50) / 2,
-                      padding: EdgeInsets.only(left: 20, right: 20),
-                      margin: EdgeInsets.only(right: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.black38,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextFormField(
-                        initialValue: null,
-                        // controller: inputController,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        onChanged: (value) {
-                          litersData.addAll({
-                            day: double.parse(
-                                value.replaceAll(new RegExp(r"\s+"), ""))
-                          });
-                          print("Liters - $value");
-                          // print(litersData);
-                        },
-                        buildCounter: (context,
-                            {int? currentLength,
-                            bool? isFocused,
-                            int? maxLength}) {
-                          if (currentLength == 0) {
-                            litersData.addAll({day: null});
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                            labelText: "Liters",
-                            suffixIcon: Icon(
-                              Icons.confirmation_number,
-                              color: Colors.white,
-                            ),
-                            labelStyle: TextStyle(color: Colors.white),
-                            border: InputBorder.none),
-                      ),
+    return Column(
+      children: <Widget>[
+        Text('Data - ${day + 1}'),
+        Row(
+          children: <Widget>[
+            Container(
+              margin:
+                  EdgeInsets.only(top: 5, right: 10, left: 10, bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: (MediaQuery.of(context).size.width - 50) / 2,
+                    padding: EdgeInsets.only(left: 20, right: 20),
+                    margin: EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.black38,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    Container(
-                      width: (MediaQuery.of(context).size.width - 50) / 2,
-                      padding: EdgeInsets.only(left: 20, right: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.black38,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextFormField(
-                        initialValue: null,
-                        // controller: inputController,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.done,
-                        onChanged: (value) {
-                          fatData.addAll({
-                            day: double.parse(
-                                value.replaceAll(new RegExp(r"\s+"), ""))
-                          });
-                          print("FAT  - $value");
-                        },
-                        buildCounter: (context,
-                            {int? currentLength,
-                            bool? isFocused,
-                            int? maxLength}) {
-                          if (currentLength == 0) {
-                            fatData.addAll({day: null});
-                          }
-                          return null;
-                        },
-                        decoration: const InputDecoration(
-                            labelText: "FAT (%)",
-                            suffixIcon: Icon(
-                              Icons.integration_instructions,
-                              color: Colors.white,
-                            ),
-                            labelStyle: TextStyle(color: Colors.white),
-                            border: InputBorder.none),
-                      ),
+                    child: TextFormField(
+                      // initialValue: litersData[day]?.toString(),
+                      // controller: inputController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (value) {
+                      print("***************************");
+                      print("changed"+value);
+                      print("***************************");
+                        litersData.addAll({
+                          day: double.parse(
+                              value.replaceAll(new RegExp(r"\s+"), ""))
+                        });
+                        print("Liters - $value");
+                        // print(litersData);
+                      },
+                      buildCounter: (context,
+                          {int? currentLength,
+                          bool? isFocused,
+                          int? maxLength}) {
+                        // if (currentLength == 0) {
+                        //   if(litersData[day] == null){
+                        //     litersData.addAll({day: null});
+                        //   }
+                        // }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                          labelText: "Liters",
+                          suffixIcon: Icon(
+                            Icons.confirmation_number,
+                            color: Colors.white,
+                          ),
+                          labelStyle: TextStyle(color: Colors.white),
+                          border: InputBorder.none),
                     ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    width: (MediaQuery.of(context).size.width - 50) / 2,
+                    padding: EdgeInsets.only(left: 20, right: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.black38,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextFormField(
+                      // initialValue: fatData[day]?.toString(),
+                      // controller: inputController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      onChanged: (value) {
+                        fatData.addAll({
+                          day: double.parse(
+                              value.replaceAll(new RegExp(r"\s+"), ""))
+                        });
+                        print("FAT  - $value");
+                      },
+                      buildCounter: (context,
+                          {int? currentLength,
+                          bool? isFocused,
+                          int? maxLength}) {
+                        // if (currentLength == 0) {
+                        //   if (fatData[day] == null){
+                        //     fatData.addAll({day: null});
+                        //   }
+                        // }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                          labelText: "FAT (%)",
+                          suffixIcon: Icon(
+                            Icons.integration_instructions,
+                            color: Colors.white,
+                          ),
+                          labelStyle: TextStyle(color: Colors.white),
+                          border: InputBorder.none),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          )
-        ],
-      ),
+            ),
+          ],
+        ),
+        day == widget.days - 1 ? const SizedBox(height: 160,): Container(),
+      ],
     );
+  }
+  
+  void resetData() {
+    print("I am triggered");
+    _formKey.currentState?.reset();
+    setState(() {
+      calculatedLiters = 0;
+      calculatedBill = 0;
+      calculatedCommission = 0;
+      calculatedFinalBill = 0;
+      table_rows = [];
+      errorsData = "";
+      litersData = {};
+      fatData = {};
+    });
+
   }
 }
