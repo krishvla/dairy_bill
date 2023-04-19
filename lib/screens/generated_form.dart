@@ -25,7 +25,8 @@ class _GeneratedFormState extends State<GeneratedForm> {
       calculatedCommission,
       calculatedFinalBill,
       priceValue;
-  late List<TableRow> table_rows;      
+  late List<TableRow> table_rows;
+  late List<Map<String, String>> detailedData;      
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
     calculatedBill = 0;
     calculatedCommission = 0;
     calculatedFinalBill = 0;
+    detailedData = [];
     super.initState();
   }
 
@@ -240,6 +242,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
       errorsData = '';
     });
     table_rows = initialize_table();
+    detailedData = [];
     calculatedBill = 0;
     calculatedLiters = 0;
     priceValue = widget.liter_price / 10;
@@ -247,6 +250,11 @@ class _GeneratedFormState extends State<GeneratedForm> {
       if (litersData[i] != null && fatData[i] != null) {
         calculatedBill += litersData[i]! * fatData[i]! * priceValue;
         calculatedLiters += litersData[i]!;
+        detailedData.add({
+          "milk_qty": litersData[i]!.toString(),
+          "fat": fatData[i]!.toString(),
+          "amt": double.parse((litersData[i]! * fatData[i]! * priceValue).toString()).toStringAsFixed(3),
+        });
         table_rows.add(
           TableRow(children: [
             Container(
@@ -293,7 +301,7 @@ class _GeneratedFormState extends State<GeneratedForm> {
       context,
       MaterialPageRoute(builder: (context) => ReportsScreen(
         calculatedLiters, calculatedBill,
-        calculatedCommission, calculatedFinalBill, table_rows, errorsData
+        calculatedCommission, calculatedFinalBill, table_rows, detailedData, errorsData
       )),
     );
     // showAlertDialog(context, calculatedLiters, calculatedBill,

@@ -2,15 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:new_dairy_bill/screens/pdf_generator.dart';
 
 class ReportsScreen extends StatefulWidget {
   double calculatedLiters, calculatedBill, calculatedCommission, calculatedFinalBill;
   List<TableRow> table_rows;
+  List<Map<String, String>> detailedData;
   String errorsData;
 
   ReportsScreen(
     this.calculatedLiters, this.calculatedBill, this.calculatedCommission, this.calculatedFinalBill,
-      this.table_rows, this.errorsData, {super.key});
+      this.table_rows, this.detailedData, this.errorsData, {super.key});
 
   @override
   State<ReportsScreen> createState() => _ReportsScreenState();
@@ -26,6 +28,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
       ),
       body: SafeArea(
         child: buildBody(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black38,
+        onPressed: (){},
+        child: buildPdfGeneratorButton(),
       ),
     );
   }
@@ -165,5 +172,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               children: widget.table_rows,
             );
+  }
+
+  Widget buildPdfGeneratorButton(){
+    return PdfGenerator(
+      widget.calculatedLiters, widget.calculatedBill, 
+      widget.calculatedCommission, widget.calculatedFinalBill,
+      widget.detailedData,
+    );
   }
 }
